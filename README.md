@@ -11,9 +11,15 @@ This tool computes outer and (optionally) inner trace coordinates and provides:
 
 ## 📸 Interface & Output
 
-| Input Form | Generated Coordinates | Coil Visualization |
-|-----------|----------------------|------------------|
-| ![UI](static/ui.png) | ![Coordinates](static/output.png) | ![Plot](static/visual.png) |
+### Input Form 
+![UI](static/ui.png) 
+
+### Generated Coordinates 
+![Coordinates](static/output.png)
+
+### Coil Visualization 
+![Plot](static/visual.png) 
+
 
 ---
 
