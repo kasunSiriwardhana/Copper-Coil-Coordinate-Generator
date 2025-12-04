@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Copper Coil Generator</title>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+        }
+
+        body {
+            font-family: Arial;
+            background: url("/static/cuuu.jpg") no-repeat center center fixed;
+            background-size: cover;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 30px auto;
+            background: rgba(255, 255, 255, 0.88);
+            padding: 20px;
+            border-radius: 12px;
+            backdrop-filter: blur(2px);
+        }
+
+        .box { padding: 20px; border: 1px solid #aaa; border-radius: 8px; }
+        input { padding: 8px; width: 100%; margin-bottom: 12px; }
+        button { padding: 12px; width: 100%; margin-top: 5px; font-size: 16px; }
+        table { width: 100%; margin-top: 25px; border-collapse: collapse; background: rgba(255,255,255,0.95); }
+        th, td { border: 1px solid #777; padding: 6px; text-align: center; }
+    </style>
+
+</head>
+<body>
+
+<div class="container">
+    <h2>Copper Coil Coordinate Generator</h2>
+
+    <div class="box">
+        <form method="POST">
+
+            <label>Lx (mm):</label>
+            <input type="number" name="lx" value="{{ lx }}" step="0.01" required>
+
+            <label>By (mm):</label>
+            <input type="number" name="by" value="{{ by }}" step="0.01" required>
+
+            <label>Width of Coil (mm):</label>
+            <input type="number" name="width" value="{{ width }}" step="0.01" required>
+
+            <label>Gap between turns (mm):</label>
+            <input type="number" name="gap" value="{{ gap }}" step="0.01" required>
+
+            <label>Number of Turns:</label>
+            <input type="number" name="turns" value="{{ n }}" required>
+
+            <label style="display:flex; gap:10px; align-items:center; margin:10px 0;">
+            <input type="checkbox" name="include_inner" value="1"
+                    {% if include_inner %}checked{% endif %}>
+            Include inner corner coordinates (I1, I2, I3, I4)
+            </label>
+
+            <button type="submit">Generate Coordinates</button>
+        </form>
+    </div>
+
+   
+
+    {% if turns %}
+        <h3>Generated Coordinates</h3>
+
+        <table>
+
+            <tr>
+                <th>Turn</th>
+                <th>P1</th><th>P2</th><th>P3</th><th>P4</th>
+                {% if include_inner %}
+                    <th>I1</th><th>I2</th><th>I3</th><th>I4</th>
+                {% endif %}
+            </tr>
+
+            {% for t in turns %}
+            <tr>
+            <td>{{ loop.index }}</td>
+
+            <td>({{ '%.2f'|format(t[0][0]) }}, {{ '%.2f'|format(t[0][1]) }})</td>
+            <td>({{ '%.2f'|format(t[1][0]) }}, {{ '%.2f'|format(t[1][1]) }})</td>
+            <td>({{ '%.2f'|format(t[2][0]) }}, {{ '%.2f'|format(t[2][1]) }})</td>
+            <td>({{ '%.2f'|format(t[3][0]) }}, {{ '%.2f'|format(t[3][1]) }})</td>
+
+            {% if include_inner and inner_turns %}
+                {% set it = inner_turns[loop.index0] %}
+                <td>({{ '%.2f'|format(it[0][0]) }}, {{ '%.2f'|format(it[0][1]) }})</td>
+                <td>({{ '%.2f'|format(it[1][0]) }}, {{ '%.2f'|format(it[1][1]) }})</td>
+                <td>({{ '%.2f'|format(it[2][0]) }}, {{ '%.2f'|format(it[2][1]) }})</td>
+                <td>({{ '%.2f'|format(it[3][0]) }}, {{ '%.2f'|format(it[3][1]) }})</td>
+            {% endif %}
+            </tr>
+            {% endfor %}
+
+        </table>
+
+        <form action="/download" method="POST">
+            <input type="hidden" name="data" value="{{ csv_data }}">
+            <button type="submit">Download CSV</button>
+        </form>
+    {% endif %}
+
+    {% if coil_plot %}
+        <h3>Coil Visualization</h3>
+        <img src="data:image/png;base64,{{ coil_plot }}" style="width:100%; border:1px solid #444;">
+    {% endif %}
+
+
+</div>
+
+</body>
+</html>
