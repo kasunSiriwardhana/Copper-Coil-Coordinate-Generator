@@ -13,7 +13,7 @@ This tool computes outer and (optionally) inner trace coordinates and provides:
 
 | Input Form | Generated Coordinates | Coil Visualization |
 |-----------|----------------------|------------------|
-| ![UI](images/ui.png) | ![Coordinates](images/table.png) | ![Plot](images/coil_plot.png) |
+| ![UI](static/ui.png) | ![Coordinates](static/output.png) | ![Plot](static/visual.png) |
 
 ---
 
