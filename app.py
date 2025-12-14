@@ -246,8 +246,6 @@ def index():
             reversed_inner = list(reversed(inner_path))
             all_points.extend(reversed_inner)
 
-        # Optional: close the outer path back to the first point (COMSOL often likes closed curves)
-        # Uncomment if you want this behavior:
         if outer_path:
             all_points.append(outer_path[0])
 
