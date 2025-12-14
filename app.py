@@ -184,7 +184,6 @@ def format_points_txt(points):
     """
     lines = []
     for x, y in points:
-        # Use general format to avoid ugly 0.8999999999999
         lines.append(f"{x:.2f} {y:.2f}")
     return "\n".join(lines)
 
