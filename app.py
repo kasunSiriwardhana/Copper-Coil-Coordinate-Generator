@@ -174,6 +174,20 @@ def plot_spiral(path):
     img_base64 = base64.b64encode(buf.read()).decode('utf-8')
     return img_base64
 
+# -----------------------------
+# Formatting helper 
+# -----------------------------
+def format_points_txt(points):
+    """
+    Take a list of (x, y) points and return a string
+    where each line is: 'x y'.
+    """
+    lines = []
+    for x, y in points:
+        # Use general format to avoid ugly 0.8999999999999
+        lines.append(f"{x:.2f} {y:.2f}")
+    return "\n".join(lines)
+
 
 # -----------------------------
 # Routes
@@ -185,7 +199,7 @@ def index():
       - Displays a form for coil parameters
       - Computes outer (and optionally inner) coordinates
       - Generates a preview plot
-      - Prepares CSV data for download
+      - Prepares .txt file for download (outer + inner points)
     """
     # Default form values
     Lx = 10
@@ -198,7 +212,7 @@ def index():
     inner_turns = None
     include_inner = False
 
-    csv_data = None
+    txt_data  = None
     coil_plot = None
 
     if request.method == "POST":
@@ -223,34 +237,21 @@ def index():
             inner_path = inner_path_from_outer(outer_path, width)
             inner_turns = inner_turns_from_inner_path(inner_path, N)
 
-        # Prepare CSV content for coordinates
-        csv_string = io.StringIO()
-        writer = csv.writer(csv_string)
+        # Build .txt data file content
+        # First all outer points, then all inner points (if enabled).
+        all_points = list(outer_path)
 
-        if include_inner:
-            writer.writerow([
-                "Turn",
-                "P1_x","P1_y","P2_x","P2_y","P3_x","P3_y","P4_x","P4_y",
-                "I1_x","I1_y","I2_x","I2_y","I3_x","I3_y","I4_x","I4_y"
-            ])
-        else:
-            writer.writerow([
-                "Turn",
-                "P1_x","P1_y","P2_x","P2_y","P3_x","P3_y","P4_x","P4_y"
-            ])
+        if include_inner and inner_path:
+            # Reverse the inner path so COMSOL draws correctly
+            reversed_inner = list(reversed(inner_path))
+            all_points.extend(reversed_inner)
 
-        # Write one row per turn (outer + optional inner)
-        for i, row in enumerate(turns):
-            (x1,y1),(x2,y2),(x3,y3),(x4,y4) = row
-            out = [i + 1, x1,y1, x2,y2, x3,y3, x4,y4]
+        # Optional: close the outer path back to the first point (COMSOL often likes closed curves)
+        # Uncomment if you want this behavior:
+        if outer_path:
+            all_points.append(outer_path[0])
 
-            if include_inner and inner_turns:
-                (ix1,iy1),(ix2,iy2),(ix3,iy3),(ix4,iy4) = inner_turns[i]
-                out += [ix1,iy1, ix2,iy2, ix3,iy3, ix4,iy4]
-
-            writer.writerow(out)
-
-        csv_data = csv_string.getvalue()
+        txt_data = format_points_txt(all_points)
 
     return render_template(
         "index.html",
@@ -262,7 +263,7 @@ def index():
         turns=turns,
         include_inner=include_inner,
         inner_turns=inner_turns,
-        csv_data=csv_data,
+        txt_data=txt_data,
         coil_plot=coil_plot
     )
 
@@ -270,7 +271,7 @@ def index():
 @app.route("/download", methods=["POST"])
 def download():
     """
-    Endpoint to download the generated CSV data as a file attachment.
+    Endpoint to download the generated .txt  as a file attachment.
     """
     data = request.form['data']
     mem = io.BytesIO()
@@ -280,8 +281,8 @@ def download():
     return send_file(
         mem,
         as_attachment=True,
-        download_name="coil_coordinates.csv",
-        mimetype="text/csv"
+        download_name="coil_coordinates.txt",
+        mimetype="text/plain"
     )
 
 
