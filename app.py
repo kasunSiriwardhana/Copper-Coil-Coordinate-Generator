@@ -282,6 +282,8 @@ def download():
         mimetype="text/plain"
     )
 
+## Run the app (for local testing)
+## wsgi.py will handle production deployment
 
-if __name__ == "__main__":
-    app.run(debug=True)
+# if __name__ == "__main__":
+#     app.run(debug=True)
